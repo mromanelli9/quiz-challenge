@@ -137,5 +137,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 django_heroku.settings(locals())
 
 # Override django default settings with Heroku config vars
-SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
-DEBUG = os.environ.get('DEBUG', False)
+# If not loaded, use the values described here
+SECRET_KEY = str(os.environ.get('SECRET_KEY', SECRET_KEY))
+DEBUG = bool(os.environ.get('DEBUG', DEBUG))
