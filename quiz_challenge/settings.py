@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from decouple import config
 import dj_database_url
 import django_heroku
 
@@ -140,9 +141,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 django_heroku.settings(locals())
 
 # Override django default settings with Heroku config vars
-# If not loaded, use the values described here
-SECRET_KEY = str(os.environ.get('SECRET_KEY', 'develop secret key'))
-DEBUG = bool(os.environ.get('DEBUG', False))
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # crispy forms template
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

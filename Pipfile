@@ -18,6 +18,7 @@ gunicorn = "*"
 django-crispy-forms = "*"
 dj-database-url = "*"
 pytz = "*"
+python-decouple = ""
 
 
 [dev-packages]

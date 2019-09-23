@@ -4,3 +4,4 @@ django-heroku
 django-crispy-forms
 dj-database-url
 pytz
+python-decouple
