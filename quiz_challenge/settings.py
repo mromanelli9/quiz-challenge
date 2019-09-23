@@ -22,10 +22,10 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "m_*o+b&7tx0$luzs#h%k#w$!b)g45-n&$ymu-*!l*22a7b6u0t"
+SECRET_KEY = 'my secret key here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Application definition
 
@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     # http://whitenoise.evans.io/en/stable/django.html#using-whitenoise-in-development
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    # Mine
+    'crispy_forms',
+    'quiz.apps.QuizConfig',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +61,7 @@ ROOT_URLCONF = 'quiz_challenge.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'CET'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -140,3 +143,19 @@ django_heroku.settings(locals())
 # If not loaded, use the values described here
 SECRET_KEY = str(os.environ.get('SECRET_KEY', SECRET_KEY))
 DEBUG = bool(os.environ.get('DEBUG', DEBUG))
+
+# crispy forms template
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# Specify the custom model as the default user model
+AUTH_USER_MODEL = 'quiz.Player'
+
+# Login default URLs
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Useful for getting the list of online users
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+

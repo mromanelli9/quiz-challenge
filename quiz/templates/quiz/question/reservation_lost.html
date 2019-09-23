@@ -1,0 +1,15 @@
+{% extends "quiz/question/base.html" %}
+
+{% block question_body %}
+
+	<h5 class="card-title"><em>{{ approved_player }}</em> got it first!</h5>
+
+	<p>He/She won this time, but you can click for a rematch.</p>
+
+{% endblock %}
+
+{% block question_button %}
+
+	<a class="btn btn-primary btn-lg mt-2" href="{% url 'quiz:question_home' %}">Try another question</a>
+
+{% endblock %}

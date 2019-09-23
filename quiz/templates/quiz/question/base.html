@@ -1,0 +1,93 @@
+{% extends "quiz/base.html" %}
+
+
+{% block players_block %}
+
+<div class="card">
+  <div class="card-header">Players</div>
+  <div class="card-body">
+    <ul class="list-group list-group-flush">
+      {% for player in online_players %}
+        <li class="list-group-item">{{ player.nickname }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block main_content %}
+
+    <!-- Here goes the main stuff -->
+
+    <div class="card text-center" style="padding:0">
+
+      <div class="card-header">
+        {% block card_header %}
+        Question number {{ question.id }}
+        {% endblock %}
+      </div>
+
+      <div class="card-body">
+
+        <!-- Here goes the question text -->
+        {% block question_body %}
+        <h5 class="card-title text-justify"> {{ question.question_text }} </h5>
+        {% endblock %}
+
+        <!-- Here lies the button -->
+        {% block question_button %}
+        {% endblock %}
+
+      </div>
+
+        <div class="card-footer text-left">
+          {% if available_questions is null %}
+            Available questions: 0
+          {% else %}  
+            Available questions: {{ available_questions }}
+           {% endif %}
+        </div>
+
+    </div>
+
+    <!-- end question details -->
+
+{% endblock %}
+
+
+{% block alerts_block %}
+
+<div class="card">
+  <div class="card-header">Notifications</div>
+  <div class="card-body px-1" style="font-size: 90%;">
+
+     <!-- Custom page alert -->
+     {% block custom_alerts_block %}
+     {% endblock %}
+
+    <!-- Error alert -->
+<!--     <div class="alert alert-warning alert-dismissible fade show" role="alert" style="display: none;">
+      <strong>Holy guacamole!</strong> An error occured:
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>  -->
+
+
+    <!-- Success alert -->
+<!--     <div class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+      <strong>Aww yeah,</strong> the admin has approved one reservation. Click on the button to go to the next page.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+
+  </div>
+</div>
+
+{% endblock %}
+
+

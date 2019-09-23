@@ -1,0 +1,23 @@
+{% extends "quiz/base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block main_content %}
+
+<div class="card col-8" style="margin: 0 auto;">
+    <div class="card-body">
+        <h2>Sign up</h2>
+        <p class="card-text">
+            Is this the first time you visited this quiz?
+            Type in your nickname to create a profile and play.
+        </p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">Sign up</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

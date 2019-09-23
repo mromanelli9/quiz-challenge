@@ -1,0 +1,15 @@
+{% extends "quiz/question/base.html" %}
+
+{% block question_body %}
+
+	<h5 class="card-title">What a shame...</h5>	
+
+	<p>Your answer was incorrect.</p>
+
+{% endblock %}
+
+{% block question_button %}
+
+	<a class="btn btn-primary btn-lg mt-2" href="{% url 'quiz:question_home' %}">Try another question</a>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "quiz/question/base.html" %}
+
+
+{% block question_button %}
+
+  <a class="btn btn-primary btn-lg mt-2" href="{% url 'quiz:reservation' question.id %}">Reserve it!</a>
+
+{% endblock %}

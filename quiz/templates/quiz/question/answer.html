@@ -1,0 +1,90 @@
+{% extends "quiz/question/base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block question_button %}
+
+<form method="post" novalidate>
+	{% csrf_token %}
+	{{ form|crispy }}
+	{% if disable_form %}
+		<a id="proceed_button" class="btn btn-secondary btn-lg mt-2 disabled" href="{% url 'quiz:answer_steer' question.id answer_id %}">Proceed</a>
+	{% else %}
+		<button type="submit" class="btn btn-primary btn-lg mt-2">Send the answer</button>
+	{% endif %}
+</form>
+
+{% endblock %}
+
+<!-- Add a info alert here -->
+{% block custom_alerts_block %}
+
+	<div class="alert alert-info px-2" role="alert">
+	  <strong>Info</strong>
+	  	You have to wait the admin approval to procced.
+	</div>
+
+	<div class="alert alert-success px-2 collapse" role="alert">
+	  <strong>Aww yeah,</strong> now you can go.
+	</div>
+
+	<div class="alert alert-warning px-2 collapse" role="alert">
+	  <strong>Holy moly,</strong> an error occured:  
+	</div>	
+
+{% endblock %}
+
+<!-- The javascript code below is for check answer status and enable link to proceed. -->
+{% block extra_javascript_block %}
+
+	<script type="text/javascript">
+	$(document).ready(function(){
+	    var n_attempts_if_error = 3;
+
+	    function check_answer_status(try_again) {
+	        $.ajax({
+	            url: '{% url 'quiz:api_check_answer_status' %}',
+	            type: 'GET',
+	            data: {
+	                'answer_id': {{ answer_id }}
+	            },
+	            dataType: 'json',
+	            success: function(data){
+	                // Check if the question has been reserved
+	                if (data.hasOwnProperty('is_answer_been_checked') &
+	                    data.is_answer_been_checked) {
+
+	                    // Is been reserved, stop checking
+	                    try_again = false;
+
+	                    // Enable button
+	                    $('#proceed_button').removeClass('btn-secondary disabled');
+	                    $('#proceed_button').addClass('btn-primary');
+	                    $('#button_go').show();
+
+	                    //// Enable alert
+	                    $('.alert-success').show();
+	                }
+	            },
+	            error: function(request, status, error) {
+	                // Display error message as an alert
+	                $('.alert-warning').html($('.alert-warning').html() + ' ' + request.responseText);
+	                $('.alert-warning').show();
+
+	                console.error(request);
+	                // Stop
+	                try_again = false
+	            },
+	            complete: function(event, request) {
+	                if (try_again) {
+	                   setTimeout(check_answer_status, 4000, try_again);
+	                }
+	            }
+	        });
+	    };
+
+	    check_answer_status(true, 3);
+	});
+	 </script>
+
+{% endblock %}
