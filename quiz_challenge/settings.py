@@ -141,8 +141,8 @@ django_heroku.settings(locals())
 
 # Override django default settings with Heroku config vars
 # If not loaded, use the values described here
-SECRET_KEY = str(os.environ.get('SECRET_KEY', SECRET_KEY))
-DEBUG = bool(os.environ.get('DEBUG', DEBUG))
+SECRET_KEY = str(os.environ.get('SECRET_KEY', 'develop secret key'))
+DEBUG = bool(os.environ.get('DEBUG', False))
 
 # crispy forms template
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
