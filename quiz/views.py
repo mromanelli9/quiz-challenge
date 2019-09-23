@@ -58,7 +58,7 @@ def question_home(request):
 @login_required()
 def reservation(request, question_id):
     """
-    The player should arrive here from quiz:question
+    The player should arrive here from quiz:question_home
     after having reserved the question.
     That will be created here (only if it's the first time).
     Here (in an abstract way) the players waits until the admin
@@ -72,7 +72,7 @@ def reservation(request, question_id):
         question_id: id of the question to show.
 
     Returns:
-        A Web response. Redirects to quiz:question if there's no
+        A Web response. Redirects to quiz:question_home if there's no
         question with question_id.
 
     """
@@ -88,7 +88,7 @@ def reservation(request, question_id):
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponseRedirect(reverse('quiz:question'))
+        return HttpResponseRedirect(reverse('quiz:question_home'))
 
     # Get auth player info
     player = request.user
@@ -129,7 +129,7 @@ def reservation_steer(request, question_id):
         A Web response.
         Redirects to quiz:provide_answer if the player won the reservation,
         otherwise tpo quiz:reservation_lost.
-        Redirects back to quiz:question if there's no
+        Redirects back to quiz:question_home if there's no
         question with question_id.
 
     """
@@ -138,7 +138,7 @@ def reservation_steer(request, question_id):
 
     except (KeyError, Question.DoesNotExist):
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question'))
+        return HttpResponseRedirect(reverse('quiz:question_home'))
 
     # Check if the player has won the reservation
     reservation_approved = Reservation.objects.filter(
@@ -176,7 +176,7 @@ def reservation_lost(request, question_id, approved_player):
         approved_player: the player who won the reservation.
 
     Returns:
-        A Web response. Redirects to quiz:question if there's no
+        A Web response. Redirects to quiz:question_home if there's no
         question with question_id.
 
     """
@@ -187,7 +187,7 @@ def reservation_lost(request, question_id, approved_player):
 
     except (KeyError, Question.DoesNotExist):
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question'))
+        return HttpResponseRedirect(reverse('quiz:question_home'))
 
     return render(request, page_template, {
         'online_players': Player.objects.get_online_players(),
@@ -210,7 +210,7 @@ def provide_answer(request, question_id, reservation_id):
         reservation_id: id of the player reservation.
 
     Returns:
-        A Web response. Redirects to quiz:question if there's no
+        A Web response. Redirects to quiz:question_home if there's no
         question with question_id or no reservation with reservation_id.
 
     """
@@ -223,7 +223,7 @@ def provide_answer(request, question_id, reservation_id):
 
     except (KeyError, Question.DoesNotExist, Reservation.DoesNotExist):
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question'))
+        return HttpResponseRedirect(reverse('quiz:question_home'))
 
     # Get the player who won the reservation
     player = reservation.player
@@ -300,7 +300,7 @@ def answer_steer(request, question_id, answer_id):
         A Web response.
         Redirects to quiz:answer_correct if the player answered correctly,
         otherwise to quiz:quiz:answer_wrong
-        Redirects back to quiz:question if there's no
+        Redirects back to quiz:question_home if there's no
         question with question_id or no answer with answer_id.
 
     """
@@ -313,7 +313,7 @@ def answer_steer(request, question_id, answer_id):
 
     except (KeyError, Question.DoesNotExist, Answer.DoesNotExist):
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question_home'))
+        return HttpResponseRedirect(reverse('quiz:question_home_home'))
 
     # Render template based on the answer status
     if answer.status == Answer.STATUS_APPROVED:
@@ -336,7 +336,7 @@ def answer_steer(request, question_id, answer_id):
     else:
         # We should never be here, but handle it just in case
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question_home'))
+        return HttpResponseRedirect(reverse('quiz:question_home_home'))
 
 
 @login_required()
@@ -352,7 +352,7 @@ def answer_correct(request, question_id, answer_id):
 
     Returns:
         A Web response.
-        Redirects back to quiz:question if there's no
+        Redirects back to quiz:question_home if there's no
         question with question_id or no answer with answer_id.
 
     """
@@ -364,7 +364,7 @@ def answer_correct(request, question_id, answer_id):
 
     except (KeyError, Question.DoesNotExist, Answer.DoesNotExist):
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question'))
+        return HttpResponseRedirect(reverse('quiz:question_home'))
 
     # Return the 'you won' page
     return render(request, page_template, {
@@ -396,7 +396,7 @@ def signup(request):
             if user:
                 login(request, user)
 
-                return HttpResponseRedirect(reverse('quiz:question'))
+                return HttpResponseRedirect(reverse('quiz:question_home'))
 
             else:
                 messages.warning(request,
