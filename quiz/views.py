@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -11,22 +11,37 @@ from .forms import PlayerCreationForm, AnswerCreationForm
 
 
 def index(request):
+    """
+    Display the intro page of the app.
+
+    **Template:**
+
+    :template:`quiz/index.html`
+    """
     return render(request, 'quiz/index.html')
 
 
 @login_required()
 def question_home(request):
     """
-    This represents the first page that starts the quiz.
-    Here we query for availables questions and, based on that,
-    we show the question page or a special one for no questions.
+    The home page of the game, display an individual :model:`quiz.Question`.
+    Allows the player to reserve it using a button.
 
-    Args:
-        request: Web request.
+    **Context**
 
-    Returns:
-        A Web response.
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
 
+    **Template:**
+
+    :template:`quiz/question/home.html`
+        If a question is available.
+    :template:`quiz/question/no_questions.html`
+        If there are no LIVE questions.
     """
     # page templates
     page_template_show_question = 'quiz/question/home.html'
@@ -42,6 +57,7 @@ def question_home(request):
         # Get the question to be displayed
         current_question = available_questions.get()
 
+        # select the correct template
         page_template = page_template_show_question
 
     except Question.DoesNotExist:
@@ -58,25 +74,28 @@ def question_home(request):
 @login_required()
 def reservation(request, question_id):
     """
-    The player should arrive here from quiz:question_home
-    after having reserved the question.
-    That will be created here (only if it's the first time).
-    Here (in an abstract way) the players waits until the admin
-    approves one reservation.
+    The second step of the the game: the player has reserved a question.
+    A :model:`quiz.Reservation` object will be created here
+    (only if it's the first time).
 
-    Note: TODO: Maybe the reservation object creation should
-                be handled differently (forms)?
+    question_id is the id of the :model:`quiz.Question` to show.
 
-    Args:
-        request: Web request.
-        question_id: id of the question to show.
+    Redirects to :view:`quiz.question_home` if there's no
+    :model:`quiz.Question` with question_id.
 
-    Returns:
-        A Web response. Redirects to quiz:question_home if there's no
-        question with question_id.
+    **Context**
 
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
+
+    **Template:**
+
+    :template:`quiz/question/reservation.html`
     """
-
     page_template = 'quiz/question/reservation.html'
 
     # Retrieve the question from the id
@@ -115,23 +134,27 @@ def reservation(request, question_id):
 @login_required()
 def reservation_steer(request, question_id):
     """
-    This view steers the player based on if he/she won the reservation.
-    If the player won it, then he/she'll be redirected to the next phase,
+    This view steers the player based on the reservation approval result.
+    If the players won, then they'll be redirected to the next phase,
     where an answer will be created and submitted.
     Otherwise, another view wll show he/she that he/she lost and can
     proceed with a new question.
 
-    Args:
-        request: Web request.
-        question_id: id of the question that have been reserved.
+    question_id is the id of the :model:`quiz.Question` to show.
 
-    Returns:
-        A Web response.
-        Redirects to quiz:provide_answer if the player won the reservation,
-        otherwise tpo quiz:reservation_lost.
-        Redirects back to quiz:question_home if there's no
-        question with question_id.
+    Redirect to :view:`quiz.provide_answer` if the player won the reservation,
+    otherwise to :view:`quiz.reservation_lost`.
+    Redirect to :view:`quiz.question_home` if there's no question with
+    question_id.
 
+    **Context**
+
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
     """
     try:
         question = Question.objects.get(pk=question_id)
@@ -167,18 +190,29 @@ def reservation_steer(request, question_id):
 @login_required()
 def reservation_lost(request, question_id, approved_player):
     """
-    The player arrive here if he/she lost the reservation race.
-    The response will show a message about this.
+    Display a 'you-lost' message.
 
-    Args:
-        request: Web request.
-        question_id: id of the current question.
-        approved_player: the player who won the reservation.
+    question_id is the id of the :model:`quiz.Question` to show.
+    approved_player is the nickname of the :model:`quiz.Player` who
+    won the reservation race.
 
-    Returns:
-        A Web response. Redirects to quiz:question_home if there's no
-        question with question_id.
+    Redirect to :view:`quiz.question_home` if there's no
+    :model:`quiz.Question` with question_id.
 
+    **Context**
+
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``approved_player``
+        Nickname of a :model:`quiz.Player`.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
+
+    **Template:**
+
+    :template:`quiz/question/reservation_lost.html`
     """
     page_template = 'quiz/question_reservation_lost.html'
 
@@ -200,19 +234,35 @@ def reservation_lost(request, question_id, approved_player):
 @login_required()
 def provide_answer(request, question_id, reservation_id):
     """
-    Next step of the question process: providing an answer.
-    An AnswerCreationForm is used to create an Answer object
-    when a POST data is provided.
+    Display the current question and the form to provide an answer.
+    When data is provided, it creates a :model:`quiz.Answer` object.
 
-    Args:
-        request: Web request.
-        question_id: id of the current question.
-        reservation_id: id of the player reservation.
+    question_id is the id of the :model:`quiz.Question` to show.
+    reservation_id is the id of the :model:`quiz.Reservation` linked
+    to the auth player and current question.
 
-    Returns:
-        A Web response. Redirects to quiz:question_home if there's no
-        question with question_id or no reservation with reservation_id.
+    Redirect to :view:`quiz.question_home` if there's no
+    :model:`quiz.Question` with question_id or :model:`quiz.Reservation`
+    with reservation_id.
 
+    **Context**
+
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``form``
+        An instance of AnswerCreationForm.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
+    ``disable_form``
+        A boolean for disable the button form.
+    ``answer_id``
+        An id of a :model:`quiz.Answer` object.
+
+    **Template:**
+
+    :template:`quiz/question/answer.html`
     """
     page_template = 'quiz/question/answer.html'
 
@@ -230,6 +280,9 @@ def provide_answer(request, question_id, reservation_id):
 
     # Default values: no answers and no form visible
     answer = None
+
+    # This is used to make something visual in the template to indicate
+    # that the player has to wait admin
     disable_form = False
 
     # If data from the post is provided
@@ -254,8 +307,6 @@ def provide_answer(request, question_id, reservation_id):
                 disable_form = True
 
             else:
-                # Make something visual in the template to indicate
-                # that the player has to wait admin
                 disable_form = False
 
     else:
@@ -271,7 +322,8 @@ def provide_answer(request, question_id, reservation_id):
             form = AnswerCreationForm(initial={
                 'answer_text': answer.answer_text,
             })
-            form.fields['answer_text'].disabled = True     # disable modifications
+            # Disable modifications.
+            form.fields['answer_text'].disabled = True
             disable_form = True
 
         else:
@@ -288,25 +340,34 @@ def provide_answer(request, question_id, reservation_id):
     })
 
 
-
 @login_required()
 def answer_steer(request, question_id, answer_id):
     """
-    This view steers the player based on if he/she answered correctly.
-    If it is so, then a win-message page will be shown,
-    otherwise a lost-message page.
+    Display a message to the player based on the result of the admin approval
+    for the :model:`quiz.Answer` provided.
 
-    Args:
-        request: Web request.
-        question_id: id of the question that have been reserved.
+    question_id is the id of the :model:`quiz.Question` to show.
+    answer_id is the id of the :model:`quiz.Answer` provided.
 
-    Returns:
-        A Web response.
-        Redirects to quiz:answer_correct if the player answered correctly,
-        otherwise to quiz:quiz:answer_wrong
-        Redirects back to quiz:question_home if there's no
-        question with question_id or no answer with answer_id.
+    Redirect to :view:`quiz.question_home` if there's no
+    :model:`quiz.Question` with question_id or :model:`quiz.Answer`
+    with answer_id.
 
+    **Context**
+
+    ``online_players``
+        A query using the :model:`quiz.Player` manager.
+    ``question``
+        An instance of :model:`quiz.Question`.
+    ``available_questions``
+        A query using the :model:`quiz.Question` manager.
+
+    **Template:**
+
+    :template:`quiz/question/answer_correct.html`
+        If the answer status is APPROVED.
+    :template:`quiz/question/answer_wrong.html`
+        If the answer status is REJECTED.
     """
     page_template_answer_correct = 'quiz/question/answer_correct.html'
     page_template_answer_wrong = 'quiz/question/answer_wrong.html'
@@ -325,7 +386,6 @@ def answer_steer(request, question_id, answer_id):
             'online_players': Player.objects.get_online_players(),
             'question': question,
             'available_questions': Question.objects.questions_available(),
-            'answer_id': answer_id
         })
 
     elif answer.status == Answer.STATUS_REJECTED:
@@ -334,83 +394,70 @@ def answer_steer(request, question_id, answer_id):
             'online_players': Player.objects.get_online_players(),
             'question': question,
             'available_questions': Question.objects.questions_available(),
-            'answer_id': answer_id
         })
 
     else:
         # We should never be here, but handle it just in case
         # TODO: display a message
-        return HttpResponseRedirect(reverse('quiz:question_home_home'))
-
-
-@login_required()
-def answer_correct(request, question_id, answer_id):
-    """
-    The player arrive here if he/she answered correctly.
-    The response will show a message about this.
-
-    Args:
-        request: Web request.
-        question_id: id of the question.
-        answer_id: id of the answer.
-
-    Returns:
-        A Web response.
-        Redirects back to quiz:question_home if there's no
-        question with question_id or no answer with answer_id.
-
-    """
-    page_template = 'quiz/question/answer_correct.html'
-
-    try:
-        question = Question.objects.get(pk=question_id)
-        answer = Question.objects.get(pk=answer_id)
-
-    except (KeyError, Question.DoesNotExist, Answer.DoesNotExist):
-        # TODO: display a message
         return HttpResponseRedirect(reverse('quiz:question_home'))
-
-    # Return the 'you won' page
-    return render(request, page_template, {
-        'online_players': Player.objects.get_online_players(),
-        'question': question,
-        'form': form,
-        'available_questions': Question.objects.questions_available(),
-        'disable_form': disable_form,
-        'answer_id': answer.id if answer else None
-    })
 
 
 def signup(request):
+    """
+    Display a PlayerCreationForm that allows the creation of a new player
+    (not admin).
+
+    Redirect to :view:`quiz.question_home` if the creation and authentication
+    went well.
+    Redirect to :view:`quiz.login` if an error occurred
+    during the authentication.
+
+    **Context**
+
+    ``form``
+        An instance of PlayerCreationForm.
+
+    **Template:**
+
+    :template:`quiz/account/signup.html`
+    """
     page_template = 'quiz/account/signup.html'
 
+    # If data is provided...
     if request.method == 'POST':
+        # Populate the form.
         form = PlayerCreationForm(request.POST)
         if form.is_valid():
+            # Create a new player from the form data.
             player = form.save(commit=False)
             player.is_active = True
             player.save()
             # messages.success(request, 'Account created successfully')
 
+            # Try to authenticate the player
             user = authenticate(
                 username=player.nickname,
                 password=form.cleaned_data.get('password1')
             )
 
+            # If it worked, then redirect him to the home page.
             if user:
                 login(request, user)
 
                 return HttpResponseRedirect(reverse('quiz:question_home'))
 
             else:
-                messages.warning(request,
-                                 'Something went wrong with the '
-                                 'authentication.'
-                                 )
+                # Otherwise he'll have to do it manually.
+                # messages.warning(request,
+                #                  'Something went wrong with the '
+                #                  'authentication.'
+                #                  )
 
                 return HttpResponseRedirect(reverse('quiz:login'))
 
     else:
+        # If no data (e.g. first time visiting the page),
+        # create an empty form.
         form = PlayerCreationForm()
 
     return render(request, page_template, {
