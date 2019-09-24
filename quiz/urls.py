@@ -1,13 +1,14 @@
-from django.urls import path, include
+from django.urls import path
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
-from . import views
-from . import api
+from . import views, api
 
 app_name = 'quiz'
 urlpatterns = [
+    # HOME
     path('', views.index, name='index'),
+    # QUESTION workflow
     path('question', views.question_home, name='question_home'),
     path('question/<int:question_id>/reservation',
          views.reservation,
@@ -24,7 +25,7 @@ urlpatterns = [
     path('question/<int:question_id>/answer/<int:answer_id>/steer',
          views.answer_steer,
          name='answer_steer'),
-    # Signup, login, logout
+    # ACCOUNT: Signup, login, logout
     path('signup', views.signup, name='signup'),
     path('login',
          auth_views.LoginView.as_view(
