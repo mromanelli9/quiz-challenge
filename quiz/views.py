@@ -228,7 +228,9 @@ def provide_answer(request, question_id, reservation_id):
     # Get the player who won the reservation
     player = reservation.player
 
+    # Default values: no answers and no form visible
     answer = None
+    disable_form = False
 
     # If data from the post is provided
     if request.method == 'POST':
@@ -249,9 +251,12 @@ def provide_answer(request, question_id, reservation_id):
 
                 answer.save()
 
-        # Make something visual in the template to indicate
-        # that the player has to wait admin
-        disable_form = True
+                disable_form = True
+
+            else:
+                # Make something visual in the template to indicate
+                # that the player has to wait admin
+                disable_form = False
 
     else:
         # You should think that now an empty form should be created.
@@ -272,7 +277,6 @@ def provide_answer(request, question_id, reservation_id):
         else:
             # Otherwise create an empty form to be displayed
             form = AnswerCreationForm()
-            disable_form = False
 
     return render(request, page_template, {
         'online_players': Player.objects.get_online_players(),
