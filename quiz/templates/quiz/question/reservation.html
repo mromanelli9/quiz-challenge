@@ -19,7 +19,7 @@
 	</div>
 
 	<div class="alert alert-warning px-2 collapse" role="alert">
-	  <strong>Holy moly,</strong> an error occured:  
+	  <strong>Holy moly,</strong> an error occurred.<br />
 	</div>	
 
 {% endblock %}
@@ -33,16 +33,13 @@
 
 	    function check_reservation(try_again) {
 	        $.ajax({
-	            url: '{% url 'quiz:api_check_reservation_status' %}',
+	            url: '{% url 'quiz:api_check_question_reservation' question.id %}',
 	            type: 'GET',
-	            data: {
-	                'question_id': '{{ question.id }}'
-	            },
 	            dataType: 'json',
 	            success: function(data){
 	                // Check if the question has been reserved
-	                if (data.hasOwnProperty('is_question_reserved') &
-	                    data.is_question_reserved) {
+	                if (data.hasOwnProperty('question_reserved') &
+	                    data.question_reserved) {
 
 	                    // Is been reserved, stop checking
 	                    try_again = false;
@@ -56,12 +53,13 @@
 	                    $('.alert-success').show();
 	                }
 	            },
-	            error: function(request, status, error) {
+	            error: function(xhr, status, error) {
 	                // Display error message as an alert
-	                $('.alert-warning').html($('.alert-warning').html() + ' ' + request.responseText);
+	                var errorMessage = xhr.status + ': ' + xhr.statusText
+	                $('.alert-warning').html($('.alert-warning').html() + ' ' + errorMessage);
 	                $('.alert-warning').show();
 
-	                console.error(request);
+	                console.error('Error: ', xhr);
 	                // Stop
 	                try_again = false
 	            },

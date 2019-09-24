@@ -29,7 +29,7 @@
 	</div>
 
 	<div class="alert alert-warning px-2 collapse" role="alert">
-	  <strong>Holy moly,</strong> an error occured:  
+	  <strong>Holy moly,</strong> an error occured.<br />
 	</div>	
 
 {% endblock %}
@@ -37,22 +37,25 @@
 <!-- The javascript code below is for check answer status and enable link to proceed. -->
 {% block extra_javascript_block %}
 
+	<!--
+	If there's no answer_id that means no answer
+	and therefore there's no need to ask the status.
+	 -->
+	{% if answer_id %}
+
 	<script type="text/javascript">
 	$(document).ready(function(){
 	    var n_attempts_if_error = 3;
 
 	    function check_answer_status(try_again) {
 	        $.ajax({
-	            url: '{% url 'quiz:api_check_answer_status' %}',
+	            url: '{% url 'quiz:api_check_answer_status' answer_id %}',
 	            type: 'GET',
-	            data: {
-	                'answer_id': {{ answer_id }}
-	            },
 	            dataType: 'json',
 	            success: function(data){
 	                // Check if the question has been reserved
-	                if (data.hasOwnProperty('is_answer_been_checked') &
-	                    data.is_answer_been_checked) {
+	                if (data.hasOwnProperty('answer_status') &
+	                    data.answer_status) {
 
 	                    // Is been reserved, stop checking
 	                    try_again = false;
@@ -66,12 +69,13 @@
 	                    $('.alert-success').show();
 	                }
 	            },
-	            error: function(request, status, error) {
+	            error: function(xhr, status, error) {
 	                // Display error message as an alert
-	                $('.alert-warning').html($('.alert-warning').html() + ' ' + request.responseText);
+	                var errorMessage = xhr.status + ': ' + xhr.statusText
+	                $('.alert-warning').html($('.alert-warning').html() + ' ' + errorMessage);
 	                $('.alert-warning').show();
 
-	                console.error(request);
+	                console.error('Error: ', xhr);
 	                // Stop
 	                try_again = false
 	            },
@@ -86,5 +90,7 @@
 	    check_answer_status(true, 3);
 	});
 	 </script>
+
+	{% endif %}
 
 {% endblock %}

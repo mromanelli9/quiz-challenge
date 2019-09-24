@@ -37,10 +37,10 @@ urlpatterns = [
          {'next_page': settings.LOGOUT_REDIRECT_URL},
          name='logout'),
     # APIs
-    path('api/check_reservation_status',
-        api.api_check_reservation_status,
-        name='api_check_reservation_status'),
-    path('api/check_answer_status',
+    path('api/check_question_reservation/<int:question_id>',
+         api.api_check_question_reservation,
+         name='api_check_question_reservation'),
+    path('api/check_answer_status/<int:answer_id>',
          api.api_check_answer_status,
          name='api_check_answer_status'),
 ]
