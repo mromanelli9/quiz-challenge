@@ -38,6 +38,12 @@ Instead of using the common Django folder structure, here I've used a template
 that makes easier the deployment on Heroku.
 You can find the template [here](https://github.com/heroku/heroku-django-template).
 
+## TODO
+- [ ] Notification on admin page for when reservations and answers are created.
+- [ ] Only one question at a time and that has to be answered before
+showing another one.
+- [ ] Change how Reservation objects are created (should use forms).
+
 # License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
